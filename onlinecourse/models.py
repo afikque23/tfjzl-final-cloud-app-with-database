@@ -80,6 +80,8 @@ class Lesson(models.Model):
 
 
 # Enrollment model
+# <HINT> Once a user enrolled a class, an enrollment entry should be created between the user and course
+# And we could use the enrollment to track information such as exam submissions
 class Enrollment(models.Model):
     AUDIT = 'audit'
     HONOR = 'honor'
@@ -98,17 +100,17 @@ class Enrollment(models.Model):
 
 # <HINT> Create a Question Model with:
 # Used to persist question content for a course/lesson
-# - Many-to-one relationship with Lesson
+# - Many-to-one relationship with Course
 # - Question content
 # - Grade/score for this question
 # - Method is_get_score(self, selected_ids) to check if choices submitted earn score
 class Question(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
-    question_text = models.CharField(max_length=500)
-    grade = models.IntegerField(default=50)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    question_text = models.CharField(max_length=200)
+    grade = models.IntegerField(default=5)
 
     def __str__(self):
-        return f"Question: {self.question_text}"
+        return self.question_text
 
     def is_get_score(self, selected_ids):
         all_answers = self.choice_set.filter(is_correct=True).count()
@@ -130,7 +132,7 @@ class Choice(models.Model):
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Choice: {self.choice_text} ({'Correct' if self.is_correct else 'Incorrect'})"
+        return self.choice_text
 
 
 # <HINT> Create a Submission Model with:
@@ -142,4 +144,4 @@ class Submission(models.Model):
     choices = models.ManyToManyField(Choice)
 
     def __str__(self):
-        return f"Submission {self.id} for Enrollment {self.enrollment.id}"
+        return "Enrollment: " + str(self.enrollment.id)

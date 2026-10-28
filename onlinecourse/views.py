@@ -159,25 +159,27 @@ def show_exam_result(request, course_id, submission_id):
     submission = get_object_or_404(Submission, pk=submission_id)
 
     total_score = 0
-    max_score = 0
+    possible_score = 0
     selected_choice_ids = list(submission.choices.values_list('id', flat=True))
 
-    for lesson in course.lesson_set.all():
-        for question in lesson.question_set.all():
-            max_score += question.grade
-            if question.is_get_score(selected_choice_ids):
-                total_score += question.grade
+    for question in course.question_set.all():
+        possible_score += question.grade
+        if question.is_get_score(selected_choice_ids):
+            total_score += question.grade
 
-    percentage = int((total_score / max_score) * 100) if max_score > 0 else 0
+    percentage = int((total_score / possible_score) * 100) if possible_score > 0 else 0
     passed = percentage >= 80
 
     context = {
         'course': course,
         'submission': submission,
         'grade': total_score,
-        'max_score': max_score,
+        'possible': possible_score,
+        'max_score': possible_score,
+        'score': total_score,
         'percentage': percentage,
         'passed': passed,
         'selected_ids': selected_choice_ids,
+        'choices': submission.choices.all(),
     }
     return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
